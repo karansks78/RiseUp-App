@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
+    }
+
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    match /reels/{reelId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    match /stories/{storyId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    match /chats/{chatId} {
+      allow read, write: if request.auth != null && request.resource.data.users.hasAny(request.auth.uid);
+    }
+
+    match /notifications/{notificationId} {
+      allow read, create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+match /reports/{reportId} {
+      allow create: if request.auth != null;
+      allow read: if false;
+      allow update, delete: if false;
+    }
+
+match /admins/{adminId} {
+      allow read, write: if request.auth != null && request.auth.uid == 'admin'; // Implement admin authentication
+    }
+
+    match /users/{userId}/followers/{followerId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    match /users/{userId}/following/{followingId} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}
